@@ -1,4 +1,4 @@
-/* Copyright 2014 Drew Thoreson
+/* Copyright 2014-2015 Drew Thoreson
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -38,22 +38,12 @@ int uinput_init(void)
 	if (ioctl(fd, UI_SET_EVBIT, EV_SYN) < 0)
 		return -1;
 
-#define enable_key(key) \
-	if (ioctl(fd, UI_SET_KEYBIT, key) < 0) \
-		return -1;
-	enable_key(A_EVENT);
-	enable_key(B_EVENT);
-	enable_key(X_EVENT);
-	enable_key(Y_EVENT);
-	enable_key(L_EVENT);
-	enable_key(R_EVENT);
-	enable_key(UP_EVENT);
-	enable_key(DOWN_EVENT);
-	enable_key(LEFT_EVENT);
-	enable_key(RIGHT_EVENT);
-	enable_key(START_EVENT);
-	enable_key(SELECT_EVENT);
-#undef enable_key
+	for (unsigned c = 0; c < NR_CONTROLLERS; c++) {
+		for (unsigned b = 0; b < SNES_NR_BUTTONS; b++) {
+			if (ioctl(fd, UI_SET_KEYBIT, controller[c].keymap[b]) < 0)
+				return -1;
+		}
+	}
 
 	memset(&uidev, 0, sizeof(uidev));
 	snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "usnes");

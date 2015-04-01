@@ -1,4 +1,4 @@
-/* Copyright 2014 Drew Thoreson
+/* Copyright 2014-2015 Drew Thoreson
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,25 +18,74 @@
 #define CONFIG_H_
 
 #include <linux/input.h>
+#include "snes.h"
 
-#define A_EVENT      KEY_A
-#define B_EVENT      KEY_B
-#define X_EVENT      KEY_X
-#define Y_EVENT      KEY_Y
-#define L_EVENT      KEY_L
-#define R_EVENT      KEY_R
-#define UP_EVENT     KEY_UP
-#define DOWN_EVENT   KEY_DOWN
-#define LEFT_EVENT   KEY_LEFT
-#define RIGHT_EVENT  KEY_RIGHT
-#define START_EVENT  KEY_ENTER
-#define SELECT_EVENT KEY_ESC
+/*
+ * Controller definitions.  You may add as many controllers to this list as
+ * you like and usnes will automagically poll them.
+ *
+ * It is a good idea to share CLOCK/LATCH pins between controllers, to reduce
+ * latency differences and the amount of polling that has to be done.  But if
+ * you share CLOCK/LATCH pins, they must be shared between ALL controllers,
+ * otherwise usnes will fall back to polling them individually.
+ */
+static struct controller {
+	unsigned long keymap[SNES_NR_BUTTONS];
+	unsigned char clock;
+	unsigned char latch;
+	unsigned char data;
+} controller[] =
+{{
+	.keymap = {
+		[SNES_R] = KEY_R,
+		[SNES_L] = KEY_L,
 
-#define DEFAULT_CLOCK_PIN 21
-#define DEFAULT_LATCH_PIN 20
-#define DEFAULT_DATA_PIN  16
+		[SNES_A] = KEY_A,
+		[SNES_B] = KEY_B,
+		[SNES_X] = KEY_X,
+		[SNES_Y] = KEY_Y,
 
+		[SNES_UP]    = KEY_UP,
+		[SNES_DOWN]  = KEY_DOWN,
+		[SNES_LEFT]  = KEY_LEFT,
+		[SNES_RIGHT] = KEY_RIGHT,
+
+		[SNES_START]  = KEY_ENTER,
+		[SNES_SELECT] = KEY_ESC
+	},
+	.clock = 21,
+	.latch = 20,
+	.data  = 16
+},
+/* e.g. second controller with shared CLOCK and LATCH pins: */
+/*{
+	.keymap = {
+		[SNES_R] = KEY_Q,
+		[SNES_L] = KEY_W,
+
+		[SNES_A] = KEY_E,
+		[SNES_B] = KEY_T,
+		[SNES_X] = KEY_U,
+		[SNES_Y] = KEY_I,
+
+		[SNES_UP]    = KEY_O,
+		[SNES_DOWN]  = KEY_P,
+		[SNES_LEFT]  = KEY_S,
+		[SNES_RIGHT] = KEY_D,
+
+		[SNES_START]  = KEY_F,
+		[SNES_SELECT] = KEY_G
+	},
+	.clock = 21,
+	.latch = 20,
+	.data  = 12
+}*/
+};
+#define NR_CONTROLLERS (sizeof(controller)/sizeof(*controller))
+
+/*
+ * The delay, in milliseconds, that usnes will wait after polling.
+ */
 #define POLL_MS 60
-#define PLUG_MS 1000
 
 #endif

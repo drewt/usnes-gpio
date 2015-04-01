@@ -1,4 +1,4 @@
-/* Copyright 2014 Drew Thoreson
+/* Copyright 2014-2015 Drew Thoreson
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,9 @@
  */
 
 #include <bcm2835.h>
+
+#define GPIO_HIGH HIGH
+#define GPIO_LOW  LOW
 
 #define microdelay(us) bcm2835_delayMicroseconds(us)
 #define gpio_init      bcm2835_init

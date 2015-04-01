@@ -13,8 +13,8 @@ target = usnes
 
 all: $(target)
 
-daemon.o: config.h gpio.h snes.h
-snes.o: config.h gpio.h snes.h
+daemon.o: config.h gpio.h snes.h uinput.h
+snes.o: gpio.h snes.h
 uinput.o: config.h uinput.h
 
 $(target): $(objects)

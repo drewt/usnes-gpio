@@ -1,4 +1,4 @@
-/* Copyright 2014 Drew Thoreson
+/* Copyright 2014-2015 Drew Thoreson
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -14,22 +14,21 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <stdio.h>
 #include "gpio.h"
 #include "snes.h"
 
 static inline void pulse_high(unsigned char pin, unsigned int us)
 {
-	gpio_write(pin, HIGH);
+	gpio_write(pin, GPIO_HIGH);
 	microdelay(us);
-	gpio_write(pin, LOW);
+	gpio_write(pin, GPIO_LOW);
 }
 
 static inline void pulse_low(unsigned char pin, unsigned int us)
 {
-	gpio_write(pin, LOW);
+	gpio_write(pin, GPIO_LOW);
 	microdelay(us);
-	gpio_write(pin, HIGH);
+	gpio_write(pin, GPIO_HIGH);
 }
 
 /*
@@ -51,8 +50,8 @@ snes_controller_t snes_open(unsigned char clock, unsigned char latch,
 	gpio_out(latch);
 	gpio_in(data);
 	gpio_pup(data);
-	gpio_write(clock, HIGH);
-	gpio_write(latch, LOW);
+	gpio_write(clock, GPIO_HIGH);
+	gpio_write(latch, GPIO_LOW);
 	return clock | (latch << 8) | (data << 16);
 }
 
@@ -72,6 +71,47 @@ snes_state_t snes_read(snes_controller_t ctl)
 			state |= 1;
 	}
 	return state;
+}
+
+int snes_read_multi(int n, snes_controller_t *ctl, snes_state_t *state,
+		int flags)
+{
+	// send pulse on LATCH
+	if (flags & SNES_SHARED_LATCH) {
+		pulse_high(snes_latch(ctl[0]), 12);
+	} else {
+		for (int i = 0; i < n; i++)
+			gpio_write(snes_latch(ctl[i]), GPIO_HIGH);
+		microdelay(12);
+		for (int i = 0; i < n; i++)
+			gpio_write(snes_latch(ctl[i]), GPIO_LOW);
+	}
+	microdelay(6);
+
+	for (int i = 0; i < n; i++)
+		state[i] = 0;
+
+	for (int btn = 0; btn < 16; btn++) {
+		// read button state
+		for (int i = 0; i < n; i++) {
+			state[i] <<= 1;
+			if (gpio_read(snes_data(ctl[i])))
+				state[i] |= 1;
+		}
+
+		// send pulse on CLOCK
+		if (flags & SNES_SHARED_CLOCK) {
+			pulse_low(snes_clock(ctl[0]), 6);
+		} else {
+			for (int i = 0; i < n; i++)
+				gpio_write(snes_clock(ctl[i]), GPIO_LOW);
+			microdelay(6);
+			for (int i = 0; i < n; i++)
+				gpio_write(snes_clock(ctl[i]), GPIO_HIGH);
+		}
+		microdelay(6);
+	}
+	return 0;
 }
 
 /*

@@ -1,4 +1,4 @@
-.\" Copyright (c) 2013 Drew Thoreson
+.\" Copyright (c) 2014-2015 Drew Thoreson
 .\"
 .\" %%%LICENSE_START(VERBATIM)
 .\" Permission is granted to make and distribute verbatim copies of this
@@ -33,16 +33,6 @@ usnes [OPTION]...
 over GPIO on the Raspberry Pi.  It runs as a daemon, polling the controller at
 a fixed interval and generating input events as they occur.
 .SH OPTIONS
-\fB\-c,\-\-clock\fR \fI<PIN>\fR
-.RS
-Use the GPIO pin \fI<PIN>\fR as the clock pin.
-.RE
-
-\fB\-d,\-\-data\fR \fI<PIN>\fR
-.RS
-Use the GPIO pin \fI<PIN>\fR as the serial data pin.
-.RE
-
 \fB\-f,\-\-foreground\fR
 .RS
 Run the driver as a foreground process, instead of a daemon.
@@ -51,11 +41,6 @@ Run the driver as a foreground process, instead of a daemon.
 \fB\-h,\-\-help\fR
 .RS
 Display usage information and exit.
-.RE
-
-\fB\-l,\-\-latch\fR \fI<PIN>\fR
-.RS
-Use the GPIO pin \fI<PIN>\fR as the data latch pin.
 .RE
 .SH BUGS
 You can submit bugs to the issue tracker on Github
